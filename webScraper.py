@@ -2,7 +2,7 @@
 from bs4 import BeautifulSoup
 from urllib.request import urlopen
 
-#import re for part 2
+#import re librey for part 2
 import re
 
 import mechanicalsoup
