@@ -1,46 +1,49 @@
+import requests
+import bs4
 
-from bs4 import BeautifulSoup
-from urllib.request import urlopen
+# Define the path to your dataset file
+dataset_file = "dataset.txt"  # Replace with the actual file path
 
-#import re librey for part 2
-import re
+# Read the dataset into a dictionary
+qa_dict = {}
+with open(dataset_file, "r") as file:
+    lines = file.readlines()
+    for line in lines:
+        question, answer = line.strip().split("\t")  # Assuming questions and answers are tab-separated
+        qa_dict[question.lower()] = answer  # Convert questions to lowercase for case-insensitive matching
 
-import mechanicalsoup
-import time
-    
-#add url we want to scrapping
-url = "https://www.ceb.lk/"
-page = urlopen(url)
-html = page.read().decode("utf-8")
+# Function to find the answer for a given question
+def find_answer_local(user_question, qa_dict):
+    user_question = user_question.lower()  # Convert user's question to lowercase
+    return qa_dict.get(user_question, "I don't know the answer to that question.")
 
-     #part 1 get title on given web site
-pattern = "<title.*?>.*?</title.*?>"
-match_results = re.search(pattern, html, re.IGNORECASE)
-title = match_results.group()
-title = re.sub("<.*?>", "", title) # Remove HTML tags
-print(title)
 
-    #part 2 get all data in text format in web site
-soup = BeautifulSoup(html, "html.parser")
-print(soup.get_text()) 
+def find_answer(question, website):
+    response = requests.get(website)
+    soup = bs4.BeautifulSoup(response.content, "html.parser")
 
-#find all images details in web site
-soup.find_all("img")
-image1= soup.find_all("img")
-print(image1)
+    for paragraph in soup.find_all("p"):
+        if question in paragraph.text:
+            return paragraph.text
 
-browser = mechanicalsoup.Browser()
-page = browser.get(url)
+    return None
 
-#The number 200 represents the status code returned by the request. A status code of 200 means that the request was successful
-#unsuccessful request might show a status code of 404 if the URL doesn’t exist or 500 if there’s a server error when making the request.
+def main():
+    question = input("What is your question? ")
+    website = "https://en.wikipedia.org/wiki/Ceylon_Electricity_Board"
 
-print(page)
 
-#echanicalSoup uses Beautiful Soup to parse the HTML from the request, and page has a .soup attribute that represents a BeautifulSoup object
+    answer = find_answer(question, website)
 
-print(type(page.soup))
-print(page.soup)
+    if answer is not None:
+        print(answer)
+    elif answer is None:
+        answer = find_answer_local(question , qa_dict)
+        print(answer)
+    else:
+        print("I couldn't find an answer to your question.")
 
-print(soup.get_text())
 
+
+if __name__ == "__main__":
+    main()
