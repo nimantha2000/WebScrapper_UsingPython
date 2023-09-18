@@ -1,8 +1,12 @@
 import requests
 import bs4
+import datetime  # Import the datetime module
 
 # Define the path to your dataset file
 dataset_file = "dataset.txt"  # Replace with the actual file path
+
+# Define the path to the log file
+log_file = "unanswered_questions.log"
 
 # Read the dataset into a dictionary
 qa_dict = {}
@@ -19,15 +23,21 @@ def find_answer_local(user_question, qa_dict):
 
 def find_answer_internet(question):
     websites = [
-        "https://en.wikipedia.org/wiki/Ceylon_Electricity_Board",
-        "https://www.ceb.lk/",  # Add your additional websites here
-        "https://anothersite.com"  # Add more websites if needed
+        "https://en.wikipedia.org/wiki/Ccccd",
+        "https://www.cecb.lk/"#,
+        #"https://another-example.com"
     ]
 
     user_question_lower = question.lower()
 
     for website in websites:
-        response = requests.get(website)
+        try:
+            response = requests.get(website)
+            response.raise_for_status()  # Raise an exception for bad HTTP responses
+        except requests.exceptions.RequestException as e:
+            print(f"Error accessing {website}: {e}")
+            continue  # Continue to the next website on error
+
         soup = bs4.BeautifulSoup(response.content, "html.parser")
 
         for paragraph in soup.find_all("p"):
@@ -35,6 +45,11 @@ def find_answer_internet(question):
                 return paragraph.text
 
     return None
+
+def log_unanswered_question(question):
+    with open(log_file, "a") as log:
+        timestamp = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+        log.write(f"{timestamp} - Unanswered Question: {question}\n")
 
 def main():
     question = input("What is your question?")
@@ -54,6 +69,7 @@ def main():
             print(internet_answer)
         else:
             print("I couldn't find an answer to your question.")
+            log_unanswered_question(question)  # Log the unanswered question
 
 if __name__ == "__main__":
     while True:
