@@ -7,7 +7,7 @@ from nltk.corpus import stopwords
 
 
 # Define the path to your dataset file
-dataset_file = "dataset.txt"  # Replace with the actual file path
+dataset_file = "dataset.txt"  
 
 # Define the path to the log file
 log_file = "unanswered_questions.log"
@@ -49,8 +49,9 @@ def extract_keywords(question):
 # Function to find the answer by searching on the internet
 def find_answer_internet(question):
     websites = [
-        "https://en.wikipedia.org/wiki/Ceylon_Electricity_Board",
-        "https://www.ceb.lk/"
+        "https://www.ceb.lk/",
+        "https://en.wikipedia.org/wiki/Ceylon_Electricity_Board"
+           
     ]
 
     keywords = extract_keywords(question)
@@ -102,8 +103,7 @@ def log_unanswered_question(question):
         log.write(f"{timestamp} - Unanswered Question: {question}\n")
 
 
-def main():
-    question = input("What is your question?")
+def main(question):
 
     # First, try to find an answer locally
     local_answer = find_answer_local(question, qa_dict)
@@ -129,4 +129,6 @@ def main():
 if __name__ == "__main__":
     
     while True:
-        main()
+        question = input("What is your question?")
+        if question == "quit":break
+        main(question)
